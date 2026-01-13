@@ -3,36 +3,112 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CITY • Home</title>
+  <title>CITY • Top Ideas</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
 
-<header class="topbar topbar--landing">
+<header class="topbar">
   <div class="container topbar__inner">
-    <a class="brand" href="./index.html" aria-label="CITY Home">
+    <!-- ✅ 로고 누르면 "루트 랜딩"으로 (원하면 ./index.html로 바꿔도 됨) -->
+    <a class="brand" href="../index.html" aria-label="CITY Home">
+      <span class="brand__icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M4 20V9a2 2 0 0 1 2-2h3v13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M9 20V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M2 20h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M13 7h2M13 10h2M13 13h2M17 7h2M17 10h2M17 13h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
       <span class="brand__text">CITY</span>
     </a>
 
-    <nav class="nav nav--landing">
-      <a class="nav__link" href="./app.html">Top Ideas</a>
-      <a class="nav__link" href="./polls.html">Polls</a>
-      <a class="nav__link" href="./leaderboard.html">Leaderboard</a>
-      <a class="nav__link btnLike" href="./submit.html">Submit Idea</a>
+    <nav class="nav">
+      <!-- ✅ Top Ideas = app/index.html -->
+      <a class="nav__link is-active" href="./index.html" data-i18n="navTopIdeas">Top Ideas</a>
+      <a class="nav__link" href="./polls.html" data-i18n="navPolls">Polls</a>
+      <a class="nav__link" href="./leaderboard.html" data-i18n="navLeaderboard">Leaderboard</a>
+      <a class="nav__link" href="./submit.html" data-i18n="navSubmit">Submit Ideas</a>
     </nav>
+
+    <div class="topbar__right">
+      <div class="seg" role="tablist" aria-label="Role">
+        <button class="seg__btn" id="roleCitizenBtn" type="button" data-i18n="roleCitizen">Citizen</button>
+        <button class="seg__btn" id="roleOfficialBtn" type="button" data-i18n="roleOfficial">Official</button>
+      </div>
+
+      <button id="xpPill" class="xpPill" type="button">LV 1 • 0 XP</button>
+      <button class="btn btn--ghost" id="loginBtn" type="button">Login</button>
+
+      <select id="langSelect" class="select select--lang" aria-label="Language">
+        <option value="ko">KO</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
   </div>
 </header>
 
-<main class="landingMain">
-  <section class="landingHero">
-    <h1 class="landingTitle">Your City, Your Voice.</h1>
-    <p class="landingDesc">Submit ideas, discuss issues, and help shape our community together.</p>
-    <div class="landingCtas">
-      <a class="landingBtn" href="./app.html">Get Started</a>
-      <a class="landingBtn landingBtn--ghost" href="./submit.html">Submit Idea</a>
+<main class="container page">
+
+  <!-- ✅ 앱 홈 Hero(통계/설명) -->
+  <section class="hero">
+    <div class="hero__card">
+      <div>
+        <h1 class="hero__title" data-i18n="heroTitle">Building our city together</h1>
+        <p class="hero__desc" data-i18n="heroDesc">A platform where citizen voices lead to real change</p>
+        <a class="btn btn--primary" href="./submit.html" data-i18n="submitNewIdea">+ Submit New Idea</a>
+      </div>
+
+      <div class="hero__stats">
+        <div class="stat">
+          <div class="stat__label" data-i18n="statSubmitted">Ideas Submitted</div>
+          <div class="stat__value" id="statSubmitted">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label" data-i18n="statImplemented">Ideas Implemented</div>
+          <div class="stat__value" id="statImplemented">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label" data-i18n="statActive">Active Citizens</div>
+          <div class="stat__value" id="statActive">—</div>
+        </div>
+      </div>
     </div>
   </section>
+
+  <!-- ✅ 리스트 패널(탭/필터/리셋) -->
+  <section class="panel">
+    <div class="panel__top">
+      <h2 class="panel__title" data-i18n="navTopIdeas">Top Ideas</h2>
+
+      <div class="panel__actions">
+        <div class="tabs">
+          <button class="tab is-active" id="tabIdeas" type="button" data-i18n="tabCitizenIdeas">Citizen Ideas</button>
+          <button class="tab" id="tabInitiatives" type="button" data-i18n="tabCityInitiatives">City Initiatives</button>
+        </div>
+
+        <label class="filterLabel">
+          <span data-i18n="filterByCategory">Filter</span>
+          <select id="categorySelect" class="select">
+            <option value="all">All</option>
+            <option value="transportation">Transportation</option>
+            <option value="infrastructure">Infrastructure</option>
+            <option value="environment">Environment</option>
+            <option value="public-safety">Public Safety</option>
+            <option value="city-services">City Services</option>
+          </select>
+        </label>
+
+        <button class="btn" id="resetBtn" type="button" data-i18n="resetDemo">Reset demo data</button>
+      </div>
+    </div>
+
+    <!-- ✅ script.js의 renderIndex()가 여기(#list)에 카드들을 꽂아줌 -->
+    <div class="grid" id="list" data-mode="ideas"></div>
+  </section>
+
 </main>
 
+<script src="./script.js"></script>
 </body>
 </html>
