@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CITY • Leaderboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar__inner">
+    <a class="brand" href="./index.html" aria-label="CITY Home">
+      <span class="brand__icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M4 20V9a2 2 0 0 1 2-2h3v13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M9 20V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M2 20h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M13 7h2M13 10h2M13 13h2M17 7h2M17 10h2M17 13h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand__text">CITY</span>
+    </a>
+
+    <nav class="nav">
+      <a class="nav__link" href="./index.html" data-i18n="navTopIdeas">Top Ideas</a>
+      <a class="nav__link" href="./polls.html" data-i18n="navPolls">Polls</a>
+      <a class="nav__link is-active" href="./leaderboard.html" data-i18n="navLeaderboard">Leaderboard</a>
+      <a class="nav__link" href="./submit.html" data-i18n="navSubmit">Submit Ideas</a>
+    </nav>
+
+    <div class="topbar__right">
+      <div class="seg" role="tablist" aria-label="Role">
+        <button class="seg__btn" id="roleCitizenBtn" type="button" data-i18n="roleCitizen">Citizen</button>
+        <button class="seg__btn" id="roleOfficialBtn" type="button" data-i18n="roleOfficial">Official</button>
+      </div>
+
+      <button id="xpPill" class="xpPill" type="button">LV 1 • 0 XP</button>
+      <button class="btn btn--ghost" id="loginBtn" type="button">Login</button>
+
+      <select id="langSelect" class="select select--lang" aria-label="Language">
+        <option value="ko">KO</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main class="container page">
+  <section class="panel">
+    <div class="panel__top">
+      <h2 class="panel__title" data-i18n="navLeaderboard">Leaderboard</h2>
+      <div class="mutedSmall" data-i18n="leaderboardHint">XP ranking based on local demo data.</div>
+    </div>
+
+    <div id="leaderboardList" class="stack"></div>
+  </section>
+</main>
+
+<script src="./script.js"></script>
+</body>
+</html>
