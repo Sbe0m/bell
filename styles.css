@@ -417,3 +417,79 @@ button, input, select, textarea{ font-family:inherit; }
   .submitRow{ flex-direction: column; }
   .badgeGrid{ grid-template-columns: repeat(2, 1fr); }
 }
+/* ===== Landing (index.html) ===== */
+.topbar--landing{
+  position: sticky;
+  top: 0;
+  background:#fff;
+}
+
+.nav--landing{ display:flex; gap:16px; align-items:center; }
+.btnLike{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:1000;
+}
+.btnLike:hover{ background:#f8fafc; }
+
+.landingMain{
+  min-height: calc(100vh - 64px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f6f7fb;
+}
+
+.landingHero{
+  width:min(980px, 100%);
+  padding: 80px 18px;
+  text-align:center;
+}
+
+.landingTitle{
+  margin:0;
+  font-size:64px;
+  line-height:1.05;
+  font-weight:1200;
+  color:#111827;
+}
+
+.landingDesc{
+  margin:18px auto 0;
+  max-width: 680px;
+  font-size:18px;
+  color:#6b7280;
+  font-weight:900;
+}
+
+.landingCtas{
+  margin-top:28px;
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.landingBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 14px 22px;
+  border-radius:12px;
+  font-weight:1100;
+  border:1px solid #16a34a;
+  background:#16a34a;
+  color:#fff;
+}
+.landingBtn:hover{ filter:brightness(.98); }
+
+.landingBtn--ghost{
+  background:#fff;
+  color:#16a34a;
+}
+
+@media (max-width: 680px){
+  .landingTitle{ font-size:44px; }
+}
+
