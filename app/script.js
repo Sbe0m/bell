@@ -61,7 +61,6 @@ const I18N = {
     save: "Save",
     officialHint: "Only visible in Official mode. Status is stored in localStorage.",
 
-    /* ✅ Admin */
     adminTools: "Admin Tools",
     deleteIdea: "Delete Idea",
     adminHint: "Admin can delete user-submitted ideas and manage all comments.",
@@ -87,7 +86,6 @@ const I18N = {
 
     onlyAdminOfficial: "Only admin can switch to Official mode.",
 
-    /* Submit */
     submitPageTitle: "Submit a New Idea",
     submitPageDesc: "Share an issue, propose a solution, and help improve your city.",
     fTitle: "Title",
@@ -104,7 +102,11 @@ const I18N = {
     previewDesc: "This is how your idea will appear.",
     previewIdea: "Idea",
 
-    leaderboardHint: "XP ranking based on local demo data."
+    leaderboardHint: "XP ranking based on local demo data.",
+
+    /* ✅ My Page */
+    myPageTitle: "My Page",
+    myPageHint: "Check your badges, rank, and activity."
   },
 
   ko: {
@@ -152,7 +154,6 @@ const I18N = {
     save: "저장",
     officialHint: "담당자 모드에서만 보입니다. 상태는 localStorage에 저장됩니다.",
 
-    /* ✅ Admin */
     adminTools: "관리자 도구",
     deleteIdea: "글 삭제",
     adminHint: "관리자는 사용자 글 삭제 및 모든 댓글 관리가 가능합니다.",
@@ -178,7 +179,6 @@ const I18N = {
 
     onlyAdminOfficial: "admin만 담당자(관리자)로 전환할 수 있어요.",
 
-    /* Submit */
     submitPageTitle: "아이디어 제출",
     submitPageDesc: "불편한 점을 제안하고 해결책을 공유해서 우리 도시를 더 좋게 만들어봐요.",
     fTitle: "제목",
@@ -195,7 +195,11 @@ const I18N = {
     previewDesc: "제출 시 이렇게 보입니다.",
     previewIdea: "아이디어",
 
-    leaderboardHint: "로컬 데모 데이터 기반 XP 랭킹입니다."
+    leaderboardHint: "로컬 데모 데이터 기반 XP 랭킹입니다.",
+
+    /* ✅ My Page */
+    myPageTitle: "마이페이지",
+    myPageHint: "뱃지/등급/활동 정보를 확인할 수 있어요."
   }
 };
 
@@ -294,7 +298,7 @@ function ensureUserId(u){
 function loadAccounts(){ return readJSON(KEY_ACCOUNTS, {}); }
 function saveAccounts(m){ writeJSON(KEY_ACCOUNTS, m); }
 
-/* ✅ admin 판정: 계정명이 정확히 admin (대소문자 무시) */
+/* ✅ admin 판정 */
 function isAdminUser(){
   const u = getUser();
   if (!u.loggedIn || !u.userId || !u.name) return false;
@@ -323,7 +327,6 @@ function loginAsName(nameRaw){
     saveAccounts(accounts);
   }
 
-  // admin 계정이면 무조건 isAdmin true로 보정
   if (key === "admin" && acc.isAdmin !== true){
     acc.isAdmin = true;
     accounts[key] = acc;
@@ -351,16 +354,17 @@ function requireLogin(message){
   const u1 = loginAsName(name);
   applyI18n();
   updateXpUI();
-  syncRoleUI(); // ✅ 로그인 후 role 잠금 상태 반영
+  syncRoleUI();
+  syncAuthUI();
   return u1;
 }
 
 /* =========================
-   Role (✅ admin만 official 허용)
+   Role (admin만 official)
 ========================= */
 function getRole(){
   const raw = localStorage.getItem(KEY_ROLE) || "citizen";
-  if (!isAdminUser()) return "citizen"; // ✅ 일반 유저 강제 citizen
+  if (!isAdminUser()) return "citizen";
   return raw === "official" ? "official" : "citizen";
 }
 function setRole(role){
@@ -424,7 +428,7 @@ function descOf(item){
 }
 
 /* =========================
-   Topbar + i18n apply
+   Topbar UI
 ========================= */
 function syncRoleUI(){
   const role = getRole();
@@ -436,8 +440,6 @@ function syncRoleUI(){
   if (c && o){
     c.classList.toggle("is-active", role === "citizen");
     o.classList.toggle("is-active", role === "official");
-
-    // ✅ 일반 유저는 Official 버튼 잠금
     o.classList.toggle("is-disabled", !admin);
   }
 
@@ -445,12 +447,11 @@ function syncRoleUI(){
   const officialDivider = document.getElementById("officialDivider");
 
   if (officialTools && officialDivider){
-    const show = (admin && role === "official"); // ✅ admin + official 일 때만 표시
+    const show = (admin && role === "official");
     officialTools.hidden = !show;
     officialDivider.hidden = !show;
   }
 
-  // ✅ admin tools: admin이면 항상 보이게(원하면 role==='official'로 제한해도 됨)
   const adminTools = document.getElementById("adminTools");
   const adminDivider = document.getElementById("adminDivider");
   if (adminTools && adminDivider){
@@ -459,21 +460,35 @@ function syncRoleUI(){
   }
 }
 
+/* ✅ 로그인/프로필/로그아웃 버튼 상태 */
+function syncAuthUI(){
+  const loginBtn = document.getElementById("loginBtn");
+  const profileBtn = document.getElementById("profileBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (!loginBtn && !profileBtn && !logoutBtn) return;
+
+  const u = getUser();
+  const logged = !!(u.loggedIn && u.userId);
+
+  if (loginBtn) loginBtn.hidden = logged;
+  if (profileBtn) profileBtn.hidden = !logged;
+  if (logoutBtn) logoutBtn.hidden = !logged;
+
+  if (profileBtn && logged){
+    profileBtn.textContent = `${t("hello")} ${u.name || (getLang()==="ko" ? "사용자" : "User")}`;
+  }
+}
+
 function applyI18n(){
   document.querySelectorAll("[data-i18n]").forEach(el => {
     el.textContent = t(el.dataset.i18n);
   });
 
-  const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn){
-    const u = getUser();
-    loginBtn.textContent = !u.loggedIn
-      ? t("login")
-      : `${t("hello")} ${u.name || (getLang()==="ko" ? "사용자" : "User")} • ${t("logout")}`;
-  }
-
   const commentInput = document.getElementById("commentInput");
   if (commentInput) commentInput.placeholder = t("placeholderComment");
+
+  syncAuthUI();
 }
 
 function setupTopbar(){
@@ -488,6 +503,7 @@ function setupTopbar(){
       renderDetail();
       renderSubmitPage();
       renderXpLeaderboard();
+      renderMyPage();
       updateXpUI();
     });
   }
@@ -508,17 +524,15 @@ function setupTopbar(){
     syncRoleUI();
   });
 
+  /* ✅ Login 버튼 = 로그인만 */
   document.getElementById("loginBtn")?.addEventListener("click", () => {
     const u0 = getUser();
+    if (u0.loggedIn) return;
 
-    if (!u0.loggedIn){
-      const name = prompt(getLang()==="ko" ? "이름을 입력하세요" : "Enter your name");
-      if (name === null) return;
-      loginAsName(name);
-    } else {
-      setUser({ loggedIn:false, name:"", userId:"" });
-      localStorage.setItem(KEY_ROLE, "citizen"); // ✅ 로그아웃 시 role 초기화
-    }
+    const name = prompt(getLang()==="ko" ? "이름을 입력하세요" : "Enter your name");
+    if (name === null) return;
+
+    loginAsName(name);
 
     applyI18n();
     updateLikeUI();
@@ -526,10 +540,35 @@ function setupTopbar(){
     updateCommentHints();
     updateXpUI();
     syncRoleUI();
+    syncAuthUI();
+  });
+
+  /* ✅ Profile 버튼 = 마이페이지로 이동 */
+  document.getElementById("profileBtn")?.addEventListener("click", () => {
+    if (!isLoggedIn()){
+      alert(t("needLoginAction"));
+      return;
+    }
+    window.location.href = "./mypage.html";
+  });
+
+  /* ✅ Logout 버튼 */
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    setUser({ loggedIn:false, name:"", userId:"" });
+    localStorage.setItem(KEY_ROLE, "citizen");
+
+    applyI18n();
+    updateLikeUI();
+    renderCommentsList();
+    updateCommentHints();
+    updateXpUI();
+    syncRoleUI();
+    syncAuthUI();
   });
 
   syncRoleUI();
   applyI18n();
+  syncAuthUI();
 }
 
 /* =========================
@@ -568,7 +607,7 @@ function toggleLike(ideaId){
 }
 
 /* =========================
-   Comments (reply/edit/delete)
+   Comments
 ========================= */
 function loadCommentsAll(){ return readJSON(KEY_COMMENTS, {}); }
 function saveCommentsAll(map){ writeJSON(KEY_COMMENTS, map); }
@@ -725,6 +764,7 @@ function toast(msg){
   el.__t = setTimeout(()=> el.classList.remove("show"), 1600);
 }
 
+/* ✅ 뱃지 목록 */
 const BADGES = [
   { id:"first_idea", icon:"📝", en:"First Idea", ko:"첫 아이디어", enDesc:"Submit your first idea", koDesc:"첫 아이디어 제출" },
   { id:"first_comment", icon:"💬", en:"First Comment", ko:"첫 댓글", enDesc:"Post your first comment", koDesc:"첫 댓글 작성" },
@@ -734,19 +774,34 @@ const BADGES = [
   { id:"streak_7", icon:"🏆", en:"7-Day Streak", ko:"7일 연속", enDesc:"Be active 7 days in a row", koDesc:"7일 연속 활동" },
   { id:"level_5", icon:"⭐", en:"Level 5", ko:"레벨 5", enDesc:"Reach level 5", koDesc:"레벨 5 달성" },
   { id:"photographer", icon:"📸", en:"Photographer", ko:"사진작가", enDesc:"Submit an idea with photos", koDesc:"사진 첨부 아이디어 제출" },
+
+  /* ✅ 카테고리 수집형 */
+  { id:"cat_transportation", icon:"📍", en:"Transportation Explorer", ko:"교통 탐험가", enDesc:"Submit an idea in Transportation", koDesc:"교통 카테고리에 제안" },
+  { id:"cat_infrastructure", icon:"📍", en:"Infrastructure Explorer", ko:"인프라 탐험가", enDesc:"Submit an idea in Infrastructure", koDesc:"인프라 카테고리에 제안" },
+  { id:"cat_environment", icon:"📍", en:"Environment Explorer", ko:"환경 탐험가", enDesc:"Submit an idea in Environment", koDesc:"환경 카테고리에 제안" },
+  { id:"cat_public_safety", icon:"📍", en:"Public Safety Explorer", ko:"안전 탐험가", enDesc:"Submit an idea in Public Safety", koDesc:"공공 안전 카테고리에 제안" },
+  { id:"cat_city_services", icon:"📍", en:"City Services Explorer", ko:"행정 탐험가", enDesc:"Submit an idea in City Services", koDesc:"행정 서비스 카테고리에 제안" },
 ];
 
 function userStats(userId){
-  const ideas = loadUserIdeas().filter(x => x.authorId === userId);
+  const userIdeas = loadUserIdeas().filter(x => x.authorId === userId);
+
+  const statusMap = loadStatuses();
+  const adopted = userIdeas.filter(i => (statusMap[String(i.id)] || i.status) === "implemented").length;
+
   const allComments = loadCommentsAll();
   let myComments = 0;
   for (const k of Object.keys(allComments)){
     const arr = allComments[k] || [];
     myComments += arr.filter(c => c.userId === userId).length;
   }
-  const hasPhotoIdea = ideas.some(i => Array.isArray(i.photoIds) && i.photoIds.length > 0);
-  return { ideasCount: ideas.length, commentsCount: myComments, hasPhotoIdea };
+
+  const hasPhotoIdea = userIdeas.some(i => Array.isArray(i.photoIds) && i.photoIds.length > 0);
+
+  const cats = new Set(userIdeas.map(i => i.category).filter(Boolean));
+  return { ideasCount: userIdeas.length, commentsCount: myComments, hasPhotoIdea, adoptedCount: adopted, categories: cats };
 }
+
 function grantBadge(userId, badgeId){
   const g = loadGamify();
   const p = g[userId] || { xp:0, level:1, streak:0, lastDate:"", dayXp:0, dayKey:"", badges:{} };
@@ -762,6 +817,7 @@ function grantBadge(userId, badgeId){
   }
   return true;
 }
+
 function checkBadges(userId){
   const p = getProfile(userId);
   const s = userStats(userId);
@@ -776,14 +832,21 @@ function checkBadges(userId){
   if (p.streak >= 7) grantBadge(userId, "streak_7");
 
   if (p.level >= 5) grantBadge(userId, "level_5");
-
   if (s.hasPhotoIdea) grantBadge(userId, "photographer");
+
+  /* ✅ 카테고리 탐험가 뱃지 */
+  if (s.categories.has("transportation")) grantBadge(userId, "cat_transportation");
+  if (s.categories.has("infrastructure")) grantBadge(userId, "cat_infrastructure");
+  if (s.categories.has("environment")) grantBadge(userId, "cat_environment");
+  if (s.categories.has("public-safety")) grantBadge(userId, "cat_public_safety");
+  if (s.categories.has("city-services")) grantBadge(userId, "cat_city_services");
 }
+
 function awardXP(userId, amount, reason){
   const g = loadGamify();
   const p = g[userId] || { xp:0, level:1, streak:0, lastDate:"", dayXp:0, dayKey:"", badges:{} };
 
-  const cap = 300; // 하루 최대 XP
+  const cap = 300;
   const tk = todayKey();
   if (p.dayKey !== tk){
     p.dayKey = tk;
@@ -824,54 +887,7 @@ function awardXP(userId, amount, reason){
   checkBadges(userId);
 }
 
-function openBadgeModal(userId, userName){
-  let back = document.getElementById("badgeModalBack");
-  if (back) back.remove();
-
-  back = document.createElement("div");
-  back.id = "badgeModalBack";
-  back.className = "modalBack";
-
-  const p = getProfile(userId);
-  const lv = calcLevel(p.xp);
-
-  const cards = BADGES.map(b=>{
-    const earned = !!(p.badges && p.badges[b.id]);
-    const name = getLang()==="ko" ? b.ko : b.en;
-    const desc = getLang()==="ko" ? b.koDesc : b.enDesc;
-    return `
-      <div class="badgeCard ${earned ? "" : "locked"}">
-        <div class="badgeTop">
-          <div class="badgeIcon">${b.icon}</div>
-          <div class="badgeName">${escapeHTML(name)}</div>
-        </div>
-        <div class="badgeDesc">${escapeHTML(desc)}${earned ? (getLang()==="ko" ? " • 획득" : " • earned") : ""}</div>
-      </div>
-    `;
-  }).join("");
-
-  back.innerHTML = `
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modalHead">
-        <div class="modalTitle">${escapeHTML(userName)} • LV ${p.level} • ${p.xp} XP • ${getLang()==="ko" ? `연속 ${p.streak}일` : `${p.streak}-day streak`}</div>
-        <button class="modalClose" id="badgeModalClose" type="button">Close</button>
-      </div>
-      <div class="modalBody">
-        <div class="mutedSmall" style="margin-bottom:12px;">
-          ${getLang()==="ko"
-            ? `다음 레벨까지 ${lv.next - lv.into}XP 남음 • (하루 XP 상한 300)`
-            : `${lv.next - lv.into}XP to next level • (Daily cap 300)`}
-        </div>
-        <div class="badgeGrid">${cards}</div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(back);
-  document.getElementById("badgeModalClose").onclick = ()=> back.remove();
-  back.onclick = (e)=> { if (e.target === back) back.remove(); };
-}
-
+/* ✅ XP UI: 누르면 마이페이지로 이동 */
 function updateXpUI(){
   const btn = document.getElementById("xpPill");
   if (!btn) return;
@@ -886,7 +902,7 @@ function updateXpUI(){
   const p = getProfile(u.userId);
   const lv = calcLevel(p.xp);
   btn.textContent = `LV ${p.level} • ${lv.into}/${lv.next} XP`;
-  btn.onclick = () => openBadgeModal(u.userId, u.name || "User");
+  btn.onclick = () => window.location.href = "./mypage.html";
 }
 
 /* =========================
@@ -981,6 +997,7 @@ function renderIndex(){
     applyI18n();
     updateXpUI();
     syncRoleUI();
+    syncAuthUI();
   });
 
   function paint(){
@@ -1067,7 +1084,7 @@ function setupCommentForm(){
     const list = getComments(__detailIdeaId);
     list.push({
       id: newCommentId(),
-      parentId: __replyToId, // ✅ 답글/대댓글: 어떤 댓글이든 parent로 가능
+      parentId: __replyToId,
       userId: u.userId,
       userName: u.name || (getLang()==="ko" ? "익명" : "Anonymous"),
       content,
@@ -1076,7 +1093,6 @@ function setupCommentForm(){
     });
     setComments(__detailIdeaId, list);
 
-    // ✅ XP
     const isReply = !!__replyToId;
     awardXP(
       u.userId,
@@ -1095,7 +1111,7 @@ function setupCommentForm(){
   });
 }
 
-/* ✅ 트리(무한 depth) 렌더링 */
+/* ✅ 댓글 트리 렌더링 */
 function renderCommentsList(){
   const wrap = document.getElementById("commentList");
   if (!wrap || __detailIdeaId == null) return;
@@ -1106,7 +1122,6 @@ function renderCommentsList(){
 
   const list = getComments(__detailIdeaId);
 
-  // children map
   const childrenByParent = {};
   const roots = [];
   for (const c of list){
@@ -1118,7 +1133,6 @@ function renderCommentsList(){
     }
   }
 
-  // sort by time (old -> new)
   roots.sort((a,b)=>a.createdAt-b.createdAt);
   for (const k of Object.keys(childrenByParent)){
     childrenByParent[k].sort((a,b)=>a.createdAt-b.createdAt);
@@ -1130,9 +1144,7 @@ function renderCommentsList(){
 
     const replyBtn = `<button class="actionBtn" type="button" data-action="reply" data-id="${escapeHTML(c.id)}" data-name="${escapeHTML(c.userName)}">${t("reply")}</button>`;
 
-    // ✅ admin이면 모든 댓글 edit/delete 가능
     const canEditDelete = admin || mine;
-
     const editBtn = canEditDelete ? `<button class="actionBtn" type="button" data-action="edit" data-id="${escapeHTML(c.id)}">${t("edit")}</button>` : "";
     const delBtn  = canEditDelete ? `<button class="actionBtn danger" type="button" data-action="delete" data-id="${escapeHTML(c.id)}">${t("delete")}</button>` : "";
 
@@ -1141,7 +1153,7 @@ function renderCommentsList(){
 
   function commentHTML(c, depth){
     const edited = c.updatedAt ? (getLang()==="ko" ? " (수정됨)" : " (edited)") : "";
-    const margin = Math.min(depth, 8) * 22; // 너무 깊어지면 제한
+    const margin = Math.min(depth, 8) * 22;
     return `
       <div class="commentItem ${depth>0 ? "reply" : ""}" data-id="${escapeHTML(c.id)}" style="margin-left:${margin}px;">
         <div class="commentTop">
@@ -1298,7 +1310,7 @@ async function renderDetailPhotos(item){
   });
 }
 
-/* ✅ admin 글 삭제 (user 제출 글만) */
+/* ✅ admin 글 삭제 */
 function deleteIdeaAsAdmin(item){
   if (!isAdminUser()) return;
   const userIdeas = loadUserIdeas();
@@ -1313,7 +1325,6 @@ function deleteIdeaAsAdmin(item){
   userIdeas.splice(idx, 1);
   writeJSON(KEY_USER_IDEAS, userIdeas);
 
-  // 관련 데이터 정리: likes/comments/status
   const likes = loadLikes();
   delete likes[String(item.id)];
   saveLikes(likes);
@@ -1355,8 +1366,8 @@ function renderDetail(){
   document.getElementById("dDesc").textContent = descOf(item);
 
   syncRoleUI();
+  syncAuthUI();
 
-  // official status change (admin + official)
   const statusSel = document.getElementById("statusSelect");
   if (statusSel) statusSel.value = item.status || "new";
 
@@ -1372,7 +1383,6 @@ function renderDetail(){
     alert(getLang()==="ko" ? "저장 완료" : "Saved");
   });
 
-  // admin tools
   document.getElementById("deleteIdeaBtn")?.addEventListener("click", () => deleteIdeaAsAdmin(item));
 
   document.getElementById("likeBtn")?.addEventListener("click", () => {
@@ -1635,6 +1645,119 @@ function renderXpLeaderboard(){
 }
 
 /* =========================
+   ✅ My Page
+========================= */
+function rankFromAdopted(adopted){
+  // 너가 나중에 이미지 랭크로 바꾸기 쉽도록 단계만 먼저 잡아둠
+  if (adopted >= 10) return { en:"Legend", ko:"전설", need:10 };
+  if (adopted >= 5)  return { en:"Master", ko:"마스터", need:5 };
+  if (adopted >= 3)  return { en:"Expert", ko:"전문가", need:3 };
+  if (adopted >= 1)  return { en:"Contributor", ko:"기여자", need:1 };
+  return { en:"Newbie", ko:"뉴비", need:0 };
+}
+
+function renderMyPage(){
+  const root = document.getElementById("myPageRoot");
+  if (!root) return;
+
+  const u = getUser();
+  if (!u.loggedIn || !u.userId){
+    root.innerHTML = `
+      <div class="mutedSmall">${getLang()==="ko" ? "마이페이지를 보려면 로그인하세요." : "Please login to view your page."}</div>
+    `;
+    return;
+  }
+
+  const p = getProfile(u.userId);
+  const lv = calcLevel(p.xp);
+  const s = userStats(u.userId);
+  const r = rankFromAdopted(s.adoptedCount);
+
+  // 진행률
+  const pct = Math.max(0, Math.min(100, Math.round((lv.into / lv.next) * 100)));
+
+  // 뱃지 카드
+  const cards = BADGES.map(b=>{
+    const earned = !!(p.badges && p.badges[b.id]);
+    const name = getLang()==="ko" ? b.ko : b.en;
+    const desc = getLang()==="ko" ? b.koDesc : b.enDesc;
+
+    return `
+      <div class="badgeCard ${earned ? "" : "locked"}">
+        <div class="badgeTop">
+          <div class="badgeIcon">${b.icon}</div>
+          <div class="badgeName">${escapeHTML(name)}</div>
+        </div>
+        <div class="badgeDesc">${escapeHTML(desc)}${earned ? (getLang()==="ko" ? " • 획득" : " • earned") : ""}</div>
+      </div>
+    `;
+  }).join("");
+
+  root.innerHTML = `
+    <div class="myWrap">
+      <div class="profileCard">
+        <div class="profileTop">
+          <div>
+            <div class="profileName">${escapeHTML(u.name || "User")}</div>
+            <div class="profileMeta">
+              LV ${p.level} • ${p.xp} XP • ${getLang()==="ko" ? `연속 ${p.streak}일` : `${p.streak}-day streak`}
+            </div>
+          </div>
+
+          <div class="rankChip">
+            ${getLang()==="ko" ? `등급: ${r.ko}` : `Rank: ${r.en}`} •
+            ${getLang()==="ko" ? `채택 ${s.adoptedCount}회` : `Adopted ${s.adoptedCount}`}
+          </div>
+        </div>
+
+        <div class="progressBar" aria-label="XP Progress">
+          <div class="progressFill" style="width:${pct}%"></div>
+        </div>
+        <div class="mutedSmall" style="margin-top:8px;">
+          ${getLang()==="ko"
+            ? `다음 레벨까지 ${lv.next - lv.into}XP 남음 • (하루 XP 상한 300)`
+            : `${lv.next - lv.into}XP to next level • (Daily cap 300)`}
+        </div>
+
+        <div class="profileGrid">
+          <div class="miniStat">
+            <div class="miniLabel">${getLang()==="ko" ? "내 아이디어" : "My Ideas"}</div>
+            <div class="miniValue">${s.ideasCount}</div>
+          </div>
+          <div class="miniStat">
+            <div class="miniLabel">${getLang()==="ko" ? "내 댓글" : "My Comments"}</div>
+            <div class="miniValue">${s.commentsCount}</div>
+          </div>
+          <div class="miniStat">
+            <div class="miniLabel">${getLang()==="ko" ? "채택(반영)" : "Adopted"}</div>
+            <div class="miniValue">${s.adoptedCount}</div>
+          </div>
+          <div class="miniStat">
+            <div class="miniLabel">${getLang()==="ko" ? "카테고리 수집" : "Categories"}</div>
+            <div class="miniValue">${s.categories.size}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profileCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div style="font-weight:1200; font-size:18px;">
+            ${getLang()==="ko" ? "뱃지 컬렉션" : "Badge Collection"}
+          </div>
+          <div class="mutedSmall">
+            ${getLang()==="ko" ? "잠긴 뱃지는 회색으로 표시됩니다." : "Locked badges are greyed out."}
+          </div>
+        </div>
+
+        <div class="badgeGrid" style="margin-top:12px;">
+          ${cards}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================
    Boot
 ========================= */
 setupTopbar();
@@ -1643,6 +1766,8 @@ renderIndex();
 renderDetail();
 renderSubmitPage();
 renderXpLeaderboard();
+renderMyPage();
 applyI18n();
 updateXpUI();
 syncRoleUI();
+syncAuthUI();

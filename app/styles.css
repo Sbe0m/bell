@@ -492,4 +492,154 @@ button, input, select, textarea{ font-family:inherit; }
 @media (max-width: 680px){
   .landingTitle{ font-size:44px; }
 }
+/* ===== MyPage ===== */
+.myWrap{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:18px;
+}
+.myHead{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.myName{
+  margin:0;
+  font-size:28px;
+  font-weight:1200;
+}
+.mySub{
+  margin-top:6px;
+  color:var(--muted);
+  font-weight:900;
+}
+
+.myRow{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+.myCard{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  background:#fff;
+}
+.myCardTitle{
+  font-weight:1100;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+.myBig{
+  font-weight:1200;
+  font-size:20px;
+}
+
+.progressBar{
+  width:100%;
+  height:12px;
+  background:#f1f5f9;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  margin-top:10px;
+}
+.progressFill{
+  height:100%;
+  background: var(--brand);
+  width:0%;
+}
+
+@media (max-width: 980px){
+  .myRow{ grid-template-columns: 1fr; }
+}
+/* ===== My Page ===== */
+.myWrap{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.profileCard{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+  padding:16px;
+}
+
+.profileTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.profileName{
+  font-size:22px;
+  font-weight:1200;
+}
+
+.profileMeta{
+  margin-top:6px;
+  color:var(--muted);
+  font-weight:900;
+}
+
+.rankChip{
+  border:1px solid #dbeafe;
+  background:#eff6ff;
+  color:var(--brand);
+  border-radius:999px;
+  padding:8px 12px;
+  font-weight:1100;
+  white-space:nowrap;
+}
+
+.progressBar{
+  margin-top:12px;
+  height:12px;
+  background:#f1f5f9;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--line);
+}
+.progressFill{
+  height:100%;
+  width:0%;
+  background: var(--brand);
+}
+
+.profileGrid{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:10px;
+}
+.miniStat{
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  padding:12px;
+}
+.miniLabel{
+  color:var(--muted);
+  font-weight:900;
+  font-size:12px;
+}
+.miniValue{
+  margin-top:6px;
+  font-weight:1200;
+  font-size:18px;
+}
+
+@media (max-width: 980px){
+  .profileGrid{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
